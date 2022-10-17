@@ -19,15 +19,36 @@ const { NotImplementedError } = require('../extensions/index.js');
  * reverseMachine.decrypt('AEIHQX SX DLLU!', 'alphonse') => '!NWAD TA KCATTA'
  * 
  */
-class VigenereCipheringMachine {
-  encrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+ class VigenereCipheringMachine {
+  constructor(direct = true) {
+      this.direct = direct;
+      this.alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      this.error = 'Incorrect arguments!';
   }
-  decrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  converter(message, keyword, encrypt = true) {
+      if (!message || !keyword) {
+          throw new Error(this.error);
+      } else {
+          const messageArr = message.toUpperCase().split('');
+          const key = keyword.repeat(Math.ceil(message.length / keyword.length)).toUpperCase()
+          let i = 0;
+          const newMessage = messageArr.reduce((resultMessage, currentLetter) => {
+              if (this.alpha.includes(currentLetter)) {
+                  const currentIndex = this.alpha.indexOf(key[i++]);
+                  const newAlpha =`${this.alpha.slice(currentIndex)}${this.alpha.slice(0, currentIndex)}`;
+                  return encrypt ?
+                      `${resultMessage}${newAlpha[this.alpha.indexOf(currentLetter)]}`:
+                      `${resultMessage}${this.alpha[newAlpha.indexOf(currentLetter)]}`;
+              } else {
+                  return `${resultMessage}${currentLetter}`;
+              }
+          }, '');
+
+          return this.direct ? newMessage : newMessage.split('').reverse().join('');
+      }
   }
+  encrypt = (message, keyword) => this.converter(message, keyword);
+  decrypt = (message, keyword) => this.converter(message, keyword, false);
 }
 
 module.exports = {
